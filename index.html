@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador Aritmético</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .note {
+            position: absolute;
+            top: -20px;
+            left: -250px;
+            width: 200px;
+            background-color: #34d399;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .historical-note {
+            position: absolute;
+            top: -20px;
+            right: -250px;
+            width: 200px;
+            background-color: #3b82f6;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        select, button, input {
+            font-family: 'Poppins', sans-serif;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            font-size: 1em;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        button {
+            background-color: #4f46e5;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4338ca;
+        }
+
+        .exercise, .feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .emoji {
+            font-size: 4em;
+            display: block;
+            margin-top: 20px;
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .option-button {
+            background-color: #e5e7eb;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #d1d5db;
+        }
+
+        .evaluation-feedback {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        .evaluation-emoji {
+            font-size: 6em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="note" class="note" style="display: block;">
+            La aritmética es fundamental para desarrollar habilidades de razonamiento necesarias para enfrentar conceptos de mayor dificultad en otras áreas del conocimiento. Una base sólida en aritmética contribuye significativamente al desarrollo cognitivo, mejorando habilidades como la lógica, la resolución de problemas y la capacidad analítica. Si no se adquieren estas competencias, se pueden tener dificultades considerables al abordar disciplinas como las ciencias, la tecnología y las matemáticas más avanzadas, afectando el rendimiento académico y la capacidad de pensar críticamente.
+        </div>
+        <div id="historical-note" class="historical-note" style="display: block;">
+            La aritmética se originó en las primeras civilizaciones, como Mesopotamia y Egipto, donde se desarrollaron los primeros sistemas numéricos para el comercio y la construcción.
+        </div>
+        <h1>Entrenador Aritmético</h1>
+        <label for="operation">Seleccione el tipo de operación:</label>
+        <select id="operation">
+            <option value="suma">Suma</option>
+            <option value="resta">Resta</option>
+            <option value="multiplicacion">Multiplicación</option>
+            <option value="division">División</option>
+            <option value="mcd">Máximo Común Divisor (MCD)</option>
+            <option value="mcm">Mínimo Común Múltiplo (MCM)</option>
+            <option value="verdadero_falso">Verdadero o Falso</option>
+            <option value="expresion_equivalente">Expresión Equivalente</option>
+            <option value="suma_restas_combinadas">Suma y Resta Combinadas</option>
+            <option value="comparacion_fracciones">Comparación de Fracciones</option>
+            <option value="despeje_simple">Despeje Simple</option>
+            <option value="porcentajes">Porcentajes</option>
+        </select>
+        <button onclick="generateExercise()">Generar Ejercicio</button>
+        <button onclick="startEvaluation()">Evaluación</button>
+
+        <div id="exercise" class="exercise"></div>
+        <div class="options-container" id="options-container"></div>
+        <input type="text" id="answer" placeholder="Ingrese su respuesta">
+        <button id="verifyButton" onclick="checkAnswer()">Verificar Respuesta</button>
+        <div id="feedback" class="feedback"></div>
+        <div id="emoji" class="emoji"></div>
+        <div id="evaluation-result" class="evaluation-feedback"></div>
+        <div id="evaluation-emoji" class="evaluation-emoji"></div>
+    </div>
+    <script>
+        let evaluationMode = false;
+        let evaluationScore = 0;
+        let evaluationCount = 0;
+
+        function generateExercise() {
+            const operation = document.getElementById("operation").value;
+            let num1 = Math.floor(Math.random() * 100) + 1;
+            let num2 = Math.floor(Math.random() * 100) + 1;
+            let exerciseText = "";
+            let correctAnswer = 0;
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            switch (operation) {
+                case "suma":
+                    correctAnswer = num1 + num2;
+                    exerciseText = `${num1} + ${num2}`;
+                    break;
+                case "resta":
+                    correctAnswer = num1 - num2;
+                    exerciseText = `${num1} - ${num2}`;
+                    break;
+                case "multiplicacion":
+                    correctAnswer = num1 * num2;
+                    exerciseText = `${num1} * ${num2}`;
+                    break;
+                case "division":
+                    num2 = Math.floor(Math.random() * 9) + 1; // para evitar divisiones por cero
+                    correctAnswer = Math.floor(num1 / num2);
+                    exerciseText = `${num1} / ${num2} (Redondeado a la baja)`;
+                    break;
+                case "mcd":
+                    correctAnswer = gcd(num1, num2);
+                    exerciseText = `MCD de ${num1} y ${num2}`;
+                    break;
+                case "mcm":
+                    correctAnswer = lcm(num1, num2);
+                    exerciseText = `MCM de ${num1} y ${num2}`;
+                    break;
+                case "verdadero_falso":
+                    ({ exerciseText, correctAnswer } = generateTrueFalseExercise());
+                    break;
+                case "expresion_equivalente":
+                    ({ exerciseText, correctAnswer } = generateEquivalentExpression());
+                    break;
+                case "suma_restas_combinadas":
+                    ({ exerciseText, correctAnswer } = generateCombinedSumRest());
+                    break;
+                case "comparacion_fracciones":
+                    ({ exerciseText, correctAnswer } = generateFractionComparison());
+                    createOptionButtons(["<", ">", "="]);
+                    break;
+                case "despeje_simple":
+                    ({ exerciseText, correctAnswer } = generateSimpleEquation());
+                    break;
+                case "porcentajes":
+                    ({ exerciseText, correctAnswer } = generatePercentageExercise());
+                    break;
+            }
+
+            document.getElementById("exercise").innerText = exerciseText;
+            document.getElementById("exercise").dataset.answer = correctAnswer;
+            document.getElementById("feedback").innerText = "";
+            document.getElementById("emoji").innerText = "";
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value;
+            const correctAnswer = document.getElementById("exercise").dataset.answer;
+            const feedback = document.getElementById("feedback");
+            const emoji = document.getElementById("emoji");
+
+            if (userAnswer.toString() === correctAnswer) {
+                feedback.innerText = evaluationMode ? "¡Correcto en la evaluación!" : "¡Correcto!";
+                feedback.style.color = "green";
+                emoji.innerText = "😊";
+                emoji.style.color = "green";
+                if (evaluationMode) {
+                    evaluationScore++;
+                }
+            } else {
+                feedback.innerText = evaluationMode ? `Incorrecto en la evaluación. La respuesta correcta era ${correctAnswer}` : `Incorrecto. La respuesta correcta era ${correctAnswer}`;
+                feedback.style.color = "blue";
+                emoji.innerText = "😞";
+                emoji.style.color = "blue";
+            }
+
+            if (evaluationMode) {
+                evaluationCount++;
+                if (evaluationCount >= 10) {
+                    endEvaluation();
+                } else {
+                    generateExercise();
+                }
+            }
+        }
+
+        function startEvaluation() {
+            evaluationMode = true;
+            evaluationScore = 0;
+            evaluationCount = 0;
+            document.getElementById("evaluation-result").innerText = "";
+            document.getElementById("evaluation-emoji").innerText = "";
+            document.getElementById("note").style.display = "none";
+            document.getElementById("historical-note").style.display = "none";
+            document.getElementById("verifyButton").innerText = "Verificar Respuesta (Evaluación)";
+            generateExercise();
+        }
+
+        function endEvaluation() {
+            evaluationMode = false;
+            let score = (evaluationScore / 10) * 5;
+            const evaluationResult = document.getElementById("evaluation-result");
+            const evaluationEmoji = document.getElementById("evaluation-emoji");
+            evaluationResult.innerText = `Tu nota es: ${score.toFixed(1)}`;
+
+            if (score >= 3.0) {
+                evaluationEmoji.innerText = "😊";
+                evaluationEmoji.style.color = "green";
+            } else {
+                evaluationEmoji.innerText = "😞";
+                evaluationEmoji.style.color = "blue";
+                evaluationResult.innerText += "\nVuelve a intentarlo y entrena más!!";
+                document.getElementById("note").style.display = "block";
+                document.getElementById("historical-note").style.display = "block";
+            }
+            document.getElementById("verifyButton").innerText = "Verificar Respuesta";
+        }
+
+        function gcd(a, b) {
+            if (!b) {
+                return a;
+            }
+            return gcd(b, a % b);
+        }
+
+        function lcm(a, b) {
+            return (a * b) / gcd(a, b);
+        }
+
+        function generateTrueFalseExercise() {
+            let num1 = Math.floor(Math.random() * 20) - 10;
+            let num2 = Math.floor(Math.random() * 20) - 10;
+            let expression = `${num1} + (${num2})`;
+            let correctAnswer = num1 + num2;
+            let isTrue = Math.random() < 0.5;
+            let displayedAnswer = isTrue ? correctAnswer : correctAnswer + Math.floor(Math.random() * 5) + 1;
+            let exerciseText = `${expression} = ${displayedAnswer}`;
+            return { exerciseText, correctAnswer: isTrue ? "V" : "F" };
+        }
+
+        function generateEquivalentExpression() {
+            let num1 = Math.floor(Math.random() * 10) + 1;
+            let num2 = Math.floor(Math.random() * 10) + 1;
+            let exerciseText = `(${num1} + ${num2}) + 3`;
+            let correctAnswer = `${num1 + num2} + 3`;
+            return { exerciseText, correctAnswer };
+        }
+
+        function generateCombinedSumRest() {
+            let num1 = Math.floor(Math.random() * 20) - 10;
+            let num2 = Math.floor(Math.random() * 20) - 10;
+            let num3 = Math.floor(Math.random() * 20) - 10;
+            let exerciseText = `${num1} + (${num2}) - (${num3})`;
+            let correctAnswer = num1 + num2 - num3;
+            return { exerciseText, correctAnswer: correctAnswer.toString() };
+        }
+
+        function generateFractionComparison() {
+            let num1, num2, num3, num4;
+            do {
+                num1 = Math.floor(Math.random() * 20) - 10;
+                num2 = Math.floor(Math.random() * 20) - 10;
+            } while (num2 === 0); // Asegurar que el denominador no sea cero
+
+            do {
+                num3 = Math.floor(Math.random() * 20) - 10;
+                num4 = Math.floor(Math.random() * 20) - 10;
+            } while (num4 === 0); // Asegurar que el denominador no sea cero
+
+            let fraction1 = `${num1}/${num2}`;
+            let fraction2 = `${num3}/${num4}`;
+
+            let correctAnswer = "<";
+            if (num1 / num2 > num3 / num4) {
+                correctAnswer = ">";
+            } else if (num1 / num2 === num3 / num4) {
+                correctAnswer = "=";
+            }
+
+            let exerciseText = `${fraction1} ? ${fraction2}`;
+            return { exerciseText, correctAnswer };
+        }
+
+        function generateSimpleEquation() {
+            let num1 = Math.floor(Math.random() * 20) - 10;
+            let num2 = Math.floor(Math.random() * 20) - 10;
+            let variable = "x";
+            let correctAnswer = num1 + num2;
+            let exerciseText = `${num1} + ${variable} = ${correctAnswer}`;
+            return { exerciseText, correctAnswer: num2.toString() };
+        }
+
+        function generatePercentageExercise() {
+            const type = Math.floor(Math.random() * 3);
+            let exerciseText = "";
+            let correctAnswer = "";
+
+            switch (type) {
+                case 0:
+                    // Calculate percentage
+                    let base = Math.floor(Math.random() * 1000) + 100;
+                    let percent = Math.floor(Math.random() * 100) + 1;
+                    correctAnswer = ((percent / 100) * base).toFixed(2);
+                    exerciseText = `Calcule el ${percent}% de ${base}`;
+                    break;
+                case 1:
+                    // Convert percentage to fraction
+                    let percentage = [25, 50, 75, 100, 20, 40, 60][Math.floor(Math.random() * 7)];
+                    correctAnswer = (percentage / 100).toString();
+                    exerciseText = `Exprese ${percentage}% como una fracción reducida`;
+                    break;
+                case 2:
+                    // Convert fraction to percentage
+                    let numerator = Math.floor(Math.random() * 10) + 1;
+                    let denominator = Math.floor(Math.random() * 10) + 1;
+                    correctAnswer = ((numerator / denominator) * 100).toFixed(2) + "%";
+                    exerciseText = `Exprese la fracción ${numerator}/${denominator} como un porcentaje`;
+                    break;
+            }
+
+            return { exerciseText, correctAnswer };
+        }
+
+        function createOptionButtons(options) {
+            const optionsContainer = document.getElementById("options-container");
+            options.forEach(option => {
+                const button = document.createElement("button");
+                button.classList.add("option-button");
+                button.innerText = option;
+                button.onclick = () => {
+                    document.getElementById("answer").value = option;
+                };
+                optionsContainer.appendChild(button);
+            });
+        }
+    </script>
+</body>
+</html>
